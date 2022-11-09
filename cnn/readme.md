@@ -1,6 +1,6 @@
 Train using a image representation from molecules graphs.
 
-Images created using rdkit. Run `create_images.ipynb`
+Images created using rdkit. Run `create-images.ipynb`
 
 - Input: smiles string. Put competition data in `../dataset` directory.
 - Output: 384x384 rgb image. Images in `../images` directory.
@@ -9,7 +9,7 @@ Images created using rdkit. Run `create_images.ipynb`
 Draw.MolToFile(mol, f'../images/{id}.png', size=(384, 384), kekulize=True, wedgeBonds=True)
 ```
 
-To run the notebook set the specific FOLD variable in cell 3 with a value from 0 to 3 to run each fold respectively.
+To run the `train-resnet.ipynb` notebook set the specific FOLD variable in cell 3 with a value from 0 to 3 to run each fold respectively.
 
 The training run have 4 stages. At each stage the image size, numebr of epochs and learning rate changes.
 - Stage 1: LR: 4e-4, Image size: 224, epochs: 12
