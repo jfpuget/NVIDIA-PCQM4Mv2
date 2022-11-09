@@ -2,8 +2,8 @@ Train using a image representation from molecules graphs.
 
 Images created using rdkit. Run `create_images.ipynb`
 
-- Input: smiles string. Put competition data in ../dataset directory.
-- Output: 384x384 rgb image. Images in ../images directory.
+- Input: smiles string. Put competition data in `../dataset` directory.
+- Output: 384x384 rgb image. Images in `../images` directory.
 
 ```mol = Chem.MolFromSmiles(smiles)
 Draw.MolToFile(mol, f'../images/{id}.png', size=(384, 384), kekulize=True, wedgeBonds=True)
