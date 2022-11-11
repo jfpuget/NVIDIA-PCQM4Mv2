@@ -24,11 +24,9 @@ python cpmp_final_script.py --fname cpmp_final --fold 3 --input_dir /raid/pcqm4m
   
 The code was run in a `nvidia/pytorch:22.08-py3` container. We installed these packages in he container before running the code:
 
-`
-pip install rdkit
+`pip install rdkit
 
-pip install ogb
-`
+`pip install ogb`
 
 ogb version used was 1.3.4. The code seems to run the same with the newer ogb 1.3.5.
 
