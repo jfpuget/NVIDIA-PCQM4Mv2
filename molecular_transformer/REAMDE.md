@@ -1,6 +1,6 @@
 Code for the Molecular Transformer.
 
-The script was run with these arguments on a 8 GPU V100 SXM2 16GB node. The first 2 commands can be run in parallel, same for last 2.
+The script `cpmp_final_script.py` was run with these arguments on a 8 GPU V100 SXM2 16GB node. The first 2 commands can be run in parallel, same for last 2.
 
 `
 python cpmp_final_script.py --fname cpmp_final --fold 0 --input_dir /raid/pcqm4mv2ring --output_dir ../checkpoints \
