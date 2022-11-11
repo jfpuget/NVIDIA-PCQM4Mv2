@@ -3,22 +3,22 @@ Code for the Molecular Transformer.
 The script `cpmp_final_script.py` was run with these arguments on a 8 GPU V100 SXM2 16GB node. The first 2 commands can be run in parallel, same for last 2.
 
 `
-python cpmp_final_script.py --fname cpmp_final --fold 0 --input_dir /raid/pcqm4mv2ring --output_dir ../checkpoints \
+python cpmp_final_script.py --fname cpmp_256_bs64_lr1e-4_0 --fold 0 --input_dir /raid/pcqm4mv2ring --output_dir ../checkpoints \
   --split_path ../input/new_split_dict.pt --cuda_devices 4,5,6,7
 `
 
 `
-python cpmp_final_script.py --fname cpmp_final --fold 1 --input_dir /raid/pcqm4mv2ring --output_dir ../checkpoints \
+python cpmp_final_script.py --fname cpmp_256_bs64_lr1e-4_1 --fold 1 --input_dir /raid/pcqm4mv2ring --output_dir ../checkpoints \
   --split_path ../input/new_split_dict.pt --cuda_devices 0,1,2,3
 `
   
 `
-python cpmp_final_script.py --fname cpmp_final --fold 2 --input_dir /raid/pcqm4mv2ring --output_dir ../checkpoints \
+python cpmp_final_script.py --fname cpmp_256_bs64_lr1e-4_2 --fold 2 --input_dir /raid/pcqm4mv2ring --output_dir ../checkpoints \
   --split_path ../input/new_split_dict.pt --cuda_devices 4,5,6,7
 `
 
 `
-python cpmp_final_script.py --fname cpmp_final --fold 3 --input_dir /raid/pcqm4mv2ring --output_dir ../checkpoints \
+python cpmp_final_script.py --fname cpmp_256_bs64_lr1e-4_3 --fold 3 --input_dir /raid/pcqm4mv2ring --output_dir ../checkpoints \
   --split_path ../input/new_split_dict.pt --cuda_devices 0,1,2,3
 `
   
