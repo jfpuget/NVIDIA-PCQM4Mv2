@@ -26,9 +26,10 @@ The code was run in a `nvidia/pytorch:22.08-py3` container. We installed these p
 
 `
 pip install rdkit
+
 pip install ogb
 `
 
 ogb version used was 1.3.4. The code seems to run the same with the newer ogb 1.3.5.
 
-rdkit verision is 2022.09.1
+rdkit version is 2022.09.1
