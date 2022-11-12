@@ -600,6 +600,34 @@ def val_epoch(loader, model, device, CONFIG):
     score = metric(preds, targets)
     return np.mean(losses), score, preds, targets
 
+def test_epoch(loader, model, device, CONFIG):
+    model.eval()
+    model.zero_grad()
+    model.loss = False
+    if CONFIG['verbose']:
+        bar = tqdm(range(len(loader)))
+    else:
+        bar = range(len(loader))
+    load_iter = iter(loader)
+    preds = []
+    targets = []
+    
+    with torch.no_grad():
+        for i, batch in zip(bar, load_iter):
+
+            input_dict = {k:v.to(device, non_blocking=True) for k,v in batch.items()}
+
+            with autocast():
+                out_dict = model(input_dict)
+
+            preds.append(out_dict['preds'].detach().cpu())        
+            targets.append(input_dict['target'].detach().cpu())
+            
+    preds = torch.cat(preds, 0).numpy()      
+    targets = torch.cat(targets, 0).numpy()
+    return preds, targets
+
+
 def get_optimizer_params(model, encoder_lr, decoder_lr, weight_decay=0.0, head_decay=0.0):
         param_optimizer = list(model.named_parameters())
         no_decay = ["bias", "LayerNorm.bias", "LayerNorm.weight"]
@@ -650,17 +678,29 @@ def get_scheduler(optimizer, train_data_loader, CONFIG):
         
     return scheduler
 
-def save_checkpoint(model, epoch, fold, fname, output_dir):
+def save_checkpoint(model, epoch, fname, output_dir):
     checkpoint = {
         'model': model.state_dict(),
         'epoch': epoch,
         'fold':fold,
         }
-    torch.save(checkpoint, '%s/%s/%s_%d.pt' % (output_dir, fname, fname, fold))
+    torch.save(checkpoint, '%s/%s/%s_0.pt' % (output_dir, fname, fname))
+
+def load_model_checkpoint(fname, device, CONFIG, loss=False):
+    model = Model(CONFIG, loss=loss).to(device)
+    checkpoint = torch.load('../checkpoints/%s/%s_0.pt' % (fname, fname))
+    print(fold, checkpoint['epoch'])
+    nn.modules.utils.consume_prefix_in_state_dict_if_present(checkpoint['model'],
+                                                             prefix='module.')
+    model.load_state_dict(checkpoint['model'])
+    model.eval()
+    return model
 
 def train(CONFIG, dataset, train_idx, valid_idx, output_dir):
     fname = CONFIG['fname']
     fold = CONFIG['fold']
+    if fold is None:
+        fold = -1 # original valid dataset used for validation
     
     print(fname)
     device = torch.device('cuda')
@@ -691,36 +731,82 @@ def train(CONFIG, dataset, train_idx, valid_idx, output_dir):
                                                     optimizer, scheduler, scaler, 
                                                     device, CONFIG)        
         val_loss, val_score, _ , _ = val_epoch(valid_data_loader, model, 
-                                               device, CONFIG)                           
+                                               device, CONFIG)    
         content = 'Fold %d Ep %d train loss: %.5f metric: %.5f val loss: %.5f metric: %5f'
         values = (fold, epoch, train_loss, train_score, val_loss, val_score)
+        print(values, flush=True)
         print(content % values, flush=True)
         score = val_score
         if val_score < best_score:
             print('score improved from %0.4f to %0.4f' % (best_score, score))
             best_score = val_score
             if CONFIG['dp']:
-                save_checkpoint(model.module, epoch, fold, fname, output_dir)
+                save_checkpoint(model.module, epoch, fname, output_dir)
             else:
-                save_checkpoint(model, epoch, fold, fname, output_dir)
+                save_checkpoint(model, epoch, fname, output_dir)
 
     scores.append(best_score)
     del  valid_data_loader
     del train_data_loader, model, optimizer, scheduler, scaler
     gc.collect()
 
-def run(fname, fold, input_dir, output_dir, split_path, cuda_devices):
+def run(fname, fold, input_dir, output_dir, split_path, cuda_devices, debug):
             
     os.environ['CUDA_VISIBLE_DEVICES'] = cuda_devices
 
-    fname = 'cpmp_final'
-    
     CONFIG = init_config(cuda_devices, fname, fold, output_dir)
     seed_torch(CONFIG['seed'])
 
     dataset = get_data(input_dir)
     train_idx, valid_idx  = get_split(dataset, split_path, CONFIG)
+    if debug:
+        train_idx = train_idx[:80*CONFIG['train_batch_size']]
+        valid_idx = valid_idx[:80*CONFIG['valid_batch_size']]
     train(CONFIG, dataset, train_idx, valid_idx, output_dir)
+    
+def infer(fname, fold, input_dir, output_dir, split_path, infer_dir, cuda_devices):
+            
+    os.environ['CUDA_VISIBLE_DEVICES'] = cuda_devices
+    device = torch.device('cuda')
+    CONFIG = init_config(cuda_devices, fname, fold, output_dir)
+    CONFIG['fname'] = fname
+    seed_torch(CONFIG['seed'])
+
+    dataset = get_data(input_dir)
+    split_dict = dataset.get_idx_split()
+    testdev_idx = split_dict['test-dev'] # pytorch tensor storing indices of test-dev molecules
+    testchallenge_idx = split_dict['test-challenge'] # pytorch tensor storing indices of test-challenge molecules
+    
+    new_split_dict = torch.load(split_path)
+    
+    for fold in ['valid', 0, 1, 2, 3]:
+        if fold in [0, 1, 2, 3]:
+            valid_idx = new_split_dict['valid_%d' % fold]
+            fname_fold = fname + ('_%d' % fold)
+            dirname = fname + ('_fold%d' % fold)
+        else:
+            valid_idx = split_dict['valid'] 
+            fname_fold = fname
+            dirname = fname + '_valid'
+        dirname = infer_dir + '/' + dirname
+        
+        try:
+            os.mkdir(dirname)
+        except:
+            pass
+        print('saving predictions to', dirname)
+
+        model = load_model_checkpoint(fname_fold, device, CONFIG)
+        valid_data_loader = get_data_loader(dataset, valid_idx, shuffle=False, CONFIG=CONFIG)
+        valid_preds, valid_targets = test_epoch(valid_data_loader, model, device, CONFIG)
+        print(fname_fold, '%0.5f' % metric(valid_preds, valid_targets), flush=True)
+        np.save('%s/valid.npy' % dirname, valid_preds)
+        test_data_loader = get_data_loader(dataset, testchallenge_idx, shuffle=False, CONFIG=CONFIG)
+        test_preds, _ = test_epoch(test_data_loader, model, device, CONFIG)
+        np.save('%s/testchallenge.npy' % dirname, test_preds)
+        test_data_loader = get_data_loader(dataset, testdev_idx, shuffle=False, CONFIG=CONFIG)
+        test_preds, _ = test_epoch(test_data_loader, model, device, CONFIG)
+        np.save('%s/testdev.npy' % dirname, test_preds)
 
 if __name__ == '__main__':    
     parser = argparse.ArgumentParser(description="")
@@ -730,6 +816,8 @@ if __name__ == '__main__':
     parser.add_argument("--output_dir", help='checkpoints directory')
     parser.add_argument("--cuda_devices", help='visible cuda devices')
     parser.add_argument("--split_path", help='split path')
+    parser.add_argument("--infer_dir", help='inference directory')
+    parser.add_argument("--debug", help='use a small subset of training data', action="store_true")
     
     args = parser.parse_args()
     
@@ -768,6 +856,13 @@ if __name__ == '__main__':
     else:
         split_path = '../input/new_split_dict.pt'
     print('split path', split_path)
+    
+    print('debug', args.debug)
 
-    run(fname, fold, input_dir, output_dir, split_path, cuda_devices)
+    if args.infer_dir:
+        infer_dir = args.infer_dir
+        cuda_devices = cuda_devices.split(',')[0] # single GPU for inferencing
+        infer(fname, fold, input_dir, output_dir, split_path, infer_dir, cuda_devices)
+    else:
+        run(fname, fold, input_dir, output_dir, split_path, cuda_devices, args.debug)
     
