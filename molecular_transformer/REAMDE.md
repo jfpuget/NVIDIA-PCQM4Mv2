@@ -27,8 +27,14 @@ python cpmp_final_script.py --fname cpmp_256_bs64_lr1e-4 --fold 2 --input_dir /r
 python cpmp_final_script.py --fname cpmp_256_bs64_lr1e-4 --fold 3 --input_dir /raid/pcqm4mv2ring --output_dir ../checkpoints \
   --split_path ../input/new_split_dict.pt --cuda_devices 0,1,2,3
 `
-  
-The code was run in a `nvidia/pytorch:22.08-py3` container. We installed these packages in he container before running the code:
+The above trains 4 models, one for each validation fold. Predictions are then computed by running this code. It runs ona single GPU:
+
+`
+python cpmp_final_script.py --fname cpmp_256_bs64_lr1e-4 --input_dir /raid/pcqm4mv2ring --output_dir ../checkpoints \
+  --split_path ../input/new_split_dict.pt --infer_dir ../preds --cuda_devices 0
+`
+
+All the code was run in a `nvidia/pytorch:22.08-py3` container. We installed these packages in he container before running the code:
 
 `pip install rdkit`
 
