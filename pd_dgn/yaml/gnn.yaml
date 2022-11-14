@@ -1,0 +1,45 @@
+model:
+  desc: class name of the model
+  value: GNN
+epochs:
+  desc: Number of epochs to train over
+  value: 20 
+heads:
+  desc: number of heads
+  value: 64  
+batch_size:
+  desc: Size of each mini-batch
+  value: 128 
+H1:
+  desc: Number of hidden neurons of GNN layers
+  value: 1024
+layers:
+  desc: Number of layers of GNN
+  value: 15 
+En:
+  desc: embedding dim of node features
+  value: 16 
+Ee:
+  desc: embedding dim of edge features
+  value: 4
+dropout:
+  desc: probs of zeroing values
+  value: 0
+lr:
+  desc: learning rate
+  value: 0.0001
+wd:
+  desc: weight decay
+  value: 0.000001
+gradient_clip_val:
+  desc: gradient clip value
+  value: 0
+act:
+  desc: activation function
+  value: ReLU
+beta:
+  desc: beta in transformerconv
+  value: False
+use_kfold:
+  desc: use kfold for validation
+  value: True 
