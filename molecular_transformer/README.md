@@ -34,7 +34,7 @@ python cpmp_final_script.py --fname cpmp_256_bs64_lr1e-4 --input_dir /raid/pcqm4
   --split_path ../input/new_split_dict.pt --infer_dir ../preds --cuda_devices 0
 `
 
-All the code was run in a `nvidia/pytorch:22.08-py3` container. We installed these packages in he container before running the code:
+All the code was run in a `nvidia/pytorch:22.08-py3` container. We installed these packages in the container before running the code:
 
 `pip install rdkit`
 
