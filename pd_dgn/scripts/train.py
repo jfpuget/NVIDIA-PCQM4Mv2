@@ -21,11 +21,9 @@ from pytorch_lightning.callbacks import TQDMProgressBar
 from ogb.lsc import PCQM4Mv2Evaluator
 import torch
 
-def gnn_train(quick_run=False, logger=True, yaml_path='../yaml/gnn.yaml',
-          config=None):
+def gnn_train(quick_run, yaml_path):
 
-    if config is None:
-        config = utils.load_yaml(yaml_path)
+    config = utils.load_yaml(yaml_path)
     print(config)
 
     train_dl, valid_dl, _, _, num_feas = get_dl(PATH,config,use_kfold=config.use_kfold,fold=args.fold,quick_run=quick_run)
