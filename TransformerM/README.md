@@ -16,7 +16,8 @@ docker run -it --gpus=all --ipc=host --rm -v ${PWD}/results:/results -v ${PWD}/d
 
 ## Training
 
-### $\textrm{Transformer-M}^\textrm{base}_\textrm{without\_denoising}$
+### $\textrm{Transformer-M}^\textrm{base}_\textrm{without\\_denoising}$
+
 
 ```
 python -m torch.distributed.run --nnodes=1 --nproc_per_node=8 --max_restarts 0 --module graphormer.runtime.training \
@@ -52,7 +53,7 @@ python -m torch.distributed.run --nnodes=1 --nproc_per_node=8 --max_restarts 0 -
 --wandb
 ```
 
-### $\textrm{Transformer-M}^\textrm{large}_\textrm{with\_denoising}$
+### $\textrm{Transformer-M}^\textrm{large}_\textrm{with\\_denoising}$
 
 
 ```
