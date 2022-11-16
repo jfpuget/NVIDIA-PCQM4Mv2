@@ -66,6 +66,6 @@ def gnn_train(quick_run, yaml_path):
 
 
 if __name__ == "__main__":
-    quick_run = True 
+    quick_run = False 
     yaml_path='../yaml/gnn.yaml'
     gnn_train(quick_run=quick_run,yaml_path=yaml_path)
