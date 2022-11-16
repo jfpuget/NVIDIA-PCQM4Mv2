@@ -11,8 +11,8 @@ os.environ['CUDA_VISIBLE_DEVICES'] = str(args.gpu)
 
 import pytorch_lightning as pl
 pl.utilities.seed.seed_everything(seed=args.seed, workers=True)
+from pytorch_lightning.loggers import TensorBoardLogger
 import torch.nn.functional as F
-from tqdm import tqdm
 import utils
 from constants import PATH,MAX_NODE_FEA
 from datasets import get_dl,gety
@@ -35,6 +35,7 @@ def gnn_train(quick_run, yaml_path):
     EPOCHS = 1 if quick_run else config.epochs
     checkpoint_callback = pl.callbacks.ModelCheckpoint(monitor='valid_mae', mode='min')
     pcb = TQDMProgressBar(refresh_rate=20)
+    logger = TensorBoardLogger(PATH, name=f'fold_{args.fold}')
     trainer = pl.Trainer(gpus=1, max_epochs=EPOCHS, 
                      callbacks=[checkpoint_callback,pcb],
                      logger=logger,
@@ -65,6 +66,6 @@ def gnn_train(quick_run, yaml_path):
 
 
 if __name__ == "__main__":
-    quick_run = False 
+    quick_run = True 
     yaml_path='../yaml/gnn.yaml'
     gnn_train(quick_run=quick_run,yaml_path=yaml_path)

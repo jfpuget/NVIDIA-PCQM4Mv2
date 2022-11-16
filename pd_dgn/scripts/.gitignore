@@ -1,0 +1,14 @@
+*.csv
+pcqm4m-v2
+*.pt
+checkpoints
+*.npy
+*.npz
+*.npy
+*.p
+*.zip
+ave_results
+old_ave_results
+.ipynb_checkpoints
+lightning_logs
+__pycache__
