@@ -27,8 +27,8 @@ from graphormer.runtime.criterions.metric import Metric
 
 
 class AtomDenoiseLoss(Metric):
-    def __init__(self, key="node_pos_head", **kwargs):
-        super().__init__(f'denoise_loss')
+    def __init__(self, key='node_pos_head', **kwargs):
+        super().__init__('denoise_loss')
         self.key = key
         self.add_state('error', torch.tensor(0, dtype=torch.float32, device='cuda'))
         self.add_state('total', torch.tensor(0, dtype=torch.int32, device='cuda'))

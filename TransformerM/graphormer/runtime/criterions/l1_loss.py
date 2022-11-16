@@ -33,9 +33,7 @@ class GraphPredictionL1Loss(Metric):
         self.add_state('error', torch.tensor(0, dtype=torch.float32, device='cuda'))
         self.add_state('total', torch.tensor(0, dtype=torch.int32, device='cuda'))
 
-    def update(self, 
-               pred: Tensor, 
-               targets: Tensor, **_):
+    def update(self, pred: Tensor, targets: Tensor, **_):
         preds = pred[:, 0, :]
         n = preds.shape[0]
         error = nn.functional.l1_loss(preds.flatten(), targets.flatten(), reduction='sum')

@@ -18,10 +18,8 @@
 # LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING
 # FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER
 # DEALINGS IN THE SOFTWARE.
+from typing import Tuple
 
-from pathlib import Path
-from typing import Optional
-import numpy
 import torch
 import torch.nn.functional as F
 from torch import Tensor
@@ -36,11 +34,11 @@ def softmax_dropout(x, training: bool, dropout: float):
     y = F.dropout(y, dropout, training)
     return y.type_as(x)
 
+
 class KPGTPretext(nn.Module):
     def __init__(
         self,
         model_dim: int,
-        dropout_rate: float = 0.1,
     ):
         super().__init__()
         self.model_dim = model_dim
@@ -67,12 +65,11 @@ class KPGTPretext(nn.Module):
             activation='GELU'
         )
 
-
     def forward(
         self,
         graph_reps,
         indices
-    ) -> torch.Tensor:
+    ) -> Tuple[Tensor, Tensor]:
         logits_dc = self.kpgt_dc_mlp(graph_reps)
         logits_fp = self.kpgt_fp_mlp(graph_reps)
         return logits_dc, logits_fp

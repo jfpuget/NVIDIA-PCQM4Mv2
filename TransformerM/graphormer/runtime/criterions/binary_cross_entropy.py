@@ -33,7 +33,8 @@ class GraphPredictionBinaryCrossEntropy(Metric):
         self.add_state('total', torch.tensor(0, dtype=torch.int32, device='cuda'))
         self.add_state('correct', torch.tensor(0, dtype=torch.int32, device='cuda'))
 
-    def update(self, preds: Tensor, targets: Tensor, **_):
+    def update(self, pred: Tensor, targets: Tensor, **_):
+        preds = pred[:, 0, :]
         binary_preds = (torch.sigmoid(preds) < 0.5).int()
         preds_flatten = preds.flatten()
         targets_flatten = targets.flatten()

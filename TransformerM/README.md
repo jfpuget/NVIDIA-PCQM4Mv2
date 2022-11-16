@@ -18,7 +18,6 @@ docker run -it --gpus=all --ipc=host --rm -v ${PWD}/results:/results -v ${PWD}/d
 
 ### $\textrm{Transformer-M}^\textrm{base}_\textrm{without\\_denoising}$
 
-
 ```
 python -m torch.distributed.run --nnodes=1 --nproc_per_node=8 --max_restarts 0 --module graphormer.runtime.training \
 --dataset-source ogb --dataset-name pcqm4mv2-3d \
@@ -60,7 +59,7 @@ python -m torch.distributed.run --nnodes=1 --nproc_per_node=8 --max_restarts 0 -
 python -m torch.distributed.run --nnodes=1 --nproc_per_node=8 --max_restarts 0 --module graphormer.runtime.training \
 --dataset-source ogb --dataset-name pcqm4mv2-3d \
 --num-workers 8 \
---criterion l1_loss \
+--criterion l1_loss atom_denoise_loss \
 --metric mae \
 --architecture medium-768 \
 --num-classes 1 \
@@ -89,6 +88,9 @@ python -m torch.distributed.run --nnodes=1 --nproc_per_node=8 --max_restarts 0 -
 --cv-fold-idx 0
 --wandb
 ```
+
+### sajad v1
+
 ### sajad v2
 
 ### sajad v2-0.2

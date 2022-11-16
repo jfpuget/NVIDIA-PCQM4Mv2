@@ -25,6 +25,7 @@ import pathlib
 import random
 import sys
 import time
+from typing import List
 from typing import Optional
 
 import numpy as np
@@ -104,7 +105,7 @@ def load_state(model: nn.Module, optimizer: Optimizer, lr_scheduler: _LRSchedule
 
 def train_step(sample,
                model,
-               criterion,
+               criterions,
                grad_scaler,
                args):
     """
@@ -121,7 +122,7 @@ def train_step(sample,
     with torch.cuda.amp.autocast(enabled=args.amp):
         out = model(sample)
     total_loss = 0.0
-    for c in criterion:
+    for c in criterions:
         loss = c.update(**out, targets=targets, **sample)
         total_loss += loss
     grad_scaler.scale(total_loss).backward()
@@ -129,7 +130,7 @@ def train_step(sample,
 
 
 def train_epoch(model,
-                criterion,
+                criterions,
                 optimizer,
                 train_dataloader,
                 epoch_idx,
@@ -155,7 +156,7 @@ def train_epoch(model,
         batch = to_cuda(batch)
         loss, logs = train_step(batch,
                                 model,
-                                criterion,
+                                criterions,
                                 grad_scaler,
                                 args)
 
@@ -185,7 +186,7 @@ def train_epoch(model,
 
 
 def train(model: nn.Module,
-          criterion: Metric,
+          criterions: List[Metric],
           optimizer: Optimizer,
           lr_scheduler: Optional[_LRScheduler],
           train_dataloader: DataLoader,
@@ -208,10 +209,10 @@ def train(model: nn.Module,
         if isinstance(train_dataloader.sampler, DistributedSampler):
             train_dataloader.sampler.set_epoch(epoch_idx)
 
-        for c in criterion:
+        for c in criterions:
             c.reset()
         times = train_epoch(model,
-                            criterion,
+                            criterions,
                             optimizer,
                             train_dataloader,
                             epoch_idx,
@@ -222,7 +223,7 @@ def train(model: nn.Module,
                             args)
         total_loss = 0.0
         all_logs = dict()
-        for c in criterion:
+        for c in criterions:
             loss, logs = c.compute()
             total_loss += loss
             all_logs = {**logs, **all_logs}
@@ -293,7 +294,7 @@ def get_model(a):
     return GraphormerModel(a)
 
 
-def get_criterion(args):
+def get_criterions(args):
     criterions = []
     for criterion in args.criterion:
         try:
@@ -301,6 +302,7 @@ def get_criterion(args):
         except KeyError as e:
             raise e(f"Unknown criterion {args.criterion}")
     return criterions
+
 
 if __name__ == '__main__':
     is_distributed = init_distributed()
@@ -346,7 +348,7 @@ if __name__ == '__main__':
 
     model = get_model(args).cuda()
     flatten_module_params(model, args.amp)
-    criterion = get_criterion(args)
+    criterions = get_criterions(args)
     optimizer = AdamW(model.flat_parameters(),
                       lr=args.learning_rate,
                       betas=(0.9, 0.999),
@@ -381,7 +383,7 @@ if __name__ == '__main__':
 
     increase_l2_fetch_granularity()
     times = train(model,
-                  criterion,
+                  criterions,
                   optimizer,
                   lr_scheduler,
                   train_dataloader,

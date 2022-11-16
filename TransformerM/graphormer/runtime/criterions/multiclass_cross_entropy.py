@@ -33,7 +33,8 @@ class GraphPredictionMulticlassCrossEntropy(Metric):
         self.add_state('total', torch.tensor(0, dtype=torch.int32, device='cuda'))
         self.add_state('correct', torch.tensor(0, dtype=torch.int32, device='cuda'))
 
-    def update(self, preds: Tensor, targets: Tensor, **_):
+    def update(self, pred: Tensor, targets: Tensor, **_):
+        preds = pred[:, 0, :]
         n = preds.shape[0]
         ncorrect = (torch.argmax(preds, dim=-1).reshape(-1) == targets.reshape(-1)).sum()
         error = nn.functional.cross_entropy(
