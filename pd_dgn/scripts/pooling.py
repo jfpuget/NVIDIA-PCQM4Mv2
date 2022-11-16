@@ -18,7 +18,7 @@ def list_forward(w, x):
 
 class PointDensePooling(nn.Module):
     def __init__(self, hs):
-        super(PointAtt, self).__init__()
+        super(PointDensePooling, self).__init__()
         self.w = build_module_list(hs+[1])
         
     def forward(self, x, batch_index):

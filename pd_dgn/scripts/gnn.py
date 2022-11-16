@@ -3,7 +3,7 @@ from torch_geometric.loader import DataLoader
 from torch_geometric.nn import GCNConv, Sequential, global_add_pool, global_mean_pool, DeepGCNLayer
 from torch_geometric.nn import GATv2Conv
 from torch_geometric.nn import TransformerConv as Glayer
-from att import PointAtt,SelfAtt,NumAtom
+from pooling import PointDensePooling 
 from constants import YMIN,YMAX
 from torch.nn import Dropout, Linear, ReLU
 import torch.nn.functional as F
@@ -36,7 +36,7 @@ class DGCN(pl.LightningModule):
         for i in range(config.layers):
             ls.append(DeepGCNLayer(Glayer(H*heads, H, heads, edge_dim=3, act=act, fill_value=1.0, beta=config.beta)))
         self.layers = torch.nn.ModuleList(ls)
-        self.p = PointAtt([H*heads, H*heads//2, H*heads//4])
+        self.p = PointDensePooling([H*heads, H*heads//2, H*heads//4])
         self.out = torch.nn.Sequential(Linear(H*heads, 1),
                                        Linear(1, 1))      
 
