@@ -18,7 +18,7 @@ def gnn_predict(quick_run, yaml_path):
 
     folds = 4 
     scores = [0.0846,0.0841,0.0841,0.0841]
-    y1,scores,ys = [],[],[]
+    y1,ys = [],[]
     for c in range(folds):
         train_dl,valid_dl,testdev_dl,testchallenge_dl,num_feas = get_dl(PATH,
                                                                         config,use_kfold=True,

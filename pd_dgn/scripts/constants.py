@@ -1,4 +1,4 @@
-PATH = './'
+PATH = '.'
 KFOLD_PATH = '../../data'
 PRED_PATH = '../../ensemble/models_oofs/predictions/jiwei_b29872e'
 MAX_NODE_FEA = 36
