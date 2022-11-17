@@ -3,7 +3,7 @@ from ogb.lsc import PygPCQM4Mv2Dataset
 from torch_geometric.loader import DataLoader
 import torch
 from tqdm import tqdm
-
+from constants import KFOLD_PATH
 
 def get_ds(root, use_kfold=False, fold=None):
     pyg_dataset = PygPCQM4Mv2Dataset(root = root, smiles2graph = smiles2graph)
@@ -11,7 +11,7 @@ def get_ds(root, use_kfold=False, fold=None):
     split_dict = pyg_dataset.get_idx_split()
     if use_kfold:
         assert fold is not None
-        new_split_dict = torch.load(f'../../data/new_split_dict.pt')
+        new_split_dict = torch.load(f'{KFOLD_PATH}/new_split_dict.pt')
         train_idx = new_split_dict[f'train_{fold}']
         valid_idx = new_split_dict[f'valid_{fold}']
     else:

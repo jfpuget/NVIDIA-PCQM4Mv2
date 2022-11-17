@@ -2,7 +2,7 @@ import pytorch_lightning as pl
 import torch.nn.functional as F
 from tqdm import tqdm
 import utils
-from constants import PATH,MAX_NODE_FEA
+from constants import PATH,MAX_NODE_FEA,PRED_PATH
 from datasets import get_dl,gety
 from gnn import DGCN
 from ogb.lsc import PCQM4Mv2Evaluator
@@ -17,6 +17,7 @@ def gnn_predict(quick_run, yaml_path):
     print(config)
 
     folds = 4 
+    scores = [0.0846,0.0841,0.0841,0.0841]
     y1,scores,ys = [],[],[]
     for c in range(folds):
         train_dl,valid_dl,testdev_dl,testchallenge_dl,num_feas = get_dl(PATH,
@@ -46,7 +47,6 @@ def gnn_predict(quick_run, yaml_path):
         result_dict = evaluator.eval(input_dict)
         score2 = result_dict['mae']
         print(f'Valid MAE: {score2:.4f}')
-        scores.append(score2)
         
 
         yp_testdev = trainer.predict(model, testdev_dl, ckpt_path=ckpt)
@@ -55,9 +55,11 @@ def gnn_predict(quick_run, yaml_path):
         yp_testchallenge = trainer.predict(model, testchallenge_dl, ckpt_path=ckpt)
         yp_testchallenge = torch.cat(yp_testchallenge,dim=0)
         
-        np.save(f'{PATH}/fold_{c}/valid.npy', yp_valid.detach().cpu().float().numpy())
-        np.save(f'{PATH}/fold_{c}/testdev.npy', yp_testdev.detach().cpu().float().numpy())
-        np.save(f'{PATH}/fold_{c}/testchallenge.npy', yp_testchallenge.detach().cpu().float().numpy())
+        save_path = f'{PRED_PATH}_fold{c}_valid_{scores[c]}'
+        Path(save_path).mkdir(parents=True, exist_ok=True)
+        np.save(f'{save_path}/valid.npy', yp_valid.detach().cpu().float().numpy())
+        np.save(f'{save_path}/testdev.npy', yp_testdev.detach().cpu().float().numpy())
+        np.save(f'{save_path}/testchallenge.npy', yp_testchallenge.detach().cpu().float().numpy())
 
 
     yp = torch.cat(y1)
