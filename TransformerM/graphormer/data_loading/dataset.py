@@ -51,6 +51,7 @@ class GraphormerDataset:
         train_idx=None,
         valid_idx=None,
         test_idx=None,
+        full_train: bool = False,
     ):
         super().__init__()
         if dataset is not None:
@@ -71,7 +72,8 @@ class GraphormerDataset:
                                                              seed=seed,
                                                              data_dir=data_dir,
                                                              cv_fold_idx=cv_fold_idx,
-                                                             cv_fold_path=cv_fold_path)
+                                                             cv_fold_path=cv_fold_path,
+                                                             full_train=full_train)
         else:
             raise ValueError(f'Unknown dataset_source {dataset_source}')
 

@@ -41,7 +41,7 @@ def get_args():
                        help='Directory where the results logs should be saved')
     paths.add_argument('--dllogger-name', type=str, default='dllogger_results.json',
                        help='Name for the resulting DLLogger JSON file')
-    paths.add_argument('--prediction-name', type=str, default='predictions.pth',
+    paths.add_argument('--prediction-name', type=str, default='predictions.npy',
                        help='Name for the resulting predictions dump')
     paths.add_argument('--save-ckpt-path', type=pathlib.Path, default=None,
                        help='File where the checkpoint should be saved')
@@ -79,6 +79,8 @@ def get_args():
                         help='Minimize stdout output')
     parser.add_argument('--benchmark', type=str2bool, nargs='?', const=True, default=False,
                         help='Benchmark mode')
+    parser.add_argument('--full-train', type=str2bool, nargs='?', const=True, default=False,
+                        help='Train on full-dataset')
     parser.add_argument('--wandb', type=str2bool, nargs='?', const=True, default=False,
                         help='Enable W&B logging')
     parser.add_argument('--cv-fold-path', type=pathlib.Path, default=None,

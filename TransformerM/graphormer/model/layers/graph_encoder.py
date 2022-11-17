@@ -306,12 +306,13 @@ class GraphormerGraphEncoder(nn.Module):
         x = x.transpose(0, 1)  # sequence first
 
         attn_bias = batched_data['attn_bias'].unsqueeze(1).repeat(1, self.num_heads, 1, 1)
-        attn_bias[channels_2d_mask] += self.graph_attn_bias(
-            attn_bias[channels_2d_mask],
-            batched_data['spatial_pos'][channels_2d_mask],
-            batched_data['edge_input'][channels_2d_mask],
-            batched_data['attn_edge_type'][channels_2d_mask]
-        )
+        if channels_2d_mask.any():
+            attn_bias[channels_2d_mask] += self.graph_attn_bias(
+                attn_bias[channels_2d_mask],
+                batched_data['spatial_pos'][channels_2d_mask],
+                batched_data['edge_input'][channels_2d_mask],
+                batched_data['attn_edge_type'][channels_2d_mask]
+            )
 
         if edge_3d_bias is not None:
             attn_bias[channels_3d_mask, :, 1:, 1:] += edge_3d_bias

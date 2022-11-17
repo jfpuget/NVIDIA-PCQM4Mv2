@@ -152,7 +152,7 @@ def train_epoch(model,
         if args.benchmark:
             torch.cuda.synchronize()
             timestamps.append(time.time())
-
+            
         batch = to_cuda(batch)
         loss, logs = train_step(batch,
                                 model,
@@ -235,7 +235,7 @@ def train(model: nn.Module,
             logging.error(f'Epoch loss was NaN or inf, exiting process {local_rank}')
             sys.exit(1)
 
-        if not args.benchmark and (
+        if not args.full_train and not args.benchmark and (
                 (args.eval_interval > 0 and (
                         epoch_idx + 1) % args.eval_interval == 0) or epoch_idx + 1 == args.epochs):
             val_logs = evaluate(model, val_dataloader, local_rank, args)
@@ -334,6 +334,7 @@ if __name__ == '__main__':
         seed=args.seed,
         cv_fold_idx=args.cv_fold_idx,
         cv_fold_path=args.cv_fold_path,
+        full_train=args.full_train,
     )
     train_dataloader = dataset.train_dataloader(
         batch_size=args.batch_size, num_workers=args.num_workers,

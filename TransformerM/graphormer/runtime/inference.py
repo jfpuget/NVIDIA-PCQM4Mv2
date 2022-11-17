@@ -29,6 +29,7 @@ import torch.nn as nn
 from sklearn.metrics import roc_auc_score
 from torch.utils.data import DataLoader
 from tqdm import tqdm
+import numpy as np
 
 from graphormer.runtime.arguments import get_args
 from graphormer.runtime.utils import flatten_module_params
@@ -57,7 +58,7 @@ def evaluate(model: nn.Module,
     y_pred = torch.cat(y_pred)
     y_true = torch.cat(y_true)
 
-    torch.save(y_pred, str(args.log_dir / args.prediction_name))
+    np.save(args.log_dir / args.prediction_name, y_pred.numpy())
 
     # TODO: compute metrics on GPU?
     if args.eval_metric == 'auc':
@@ -138,6 +139,7 @@ if __name__ == '__main__':
     )
 
     logger.log_hyperparams(vars(args))
+    args.log_dir.mkdir(parents=True, exists_ok=True)
 
     torch.set_float32_matmul_precision('high')
     increase_l2_fetch_granularity()

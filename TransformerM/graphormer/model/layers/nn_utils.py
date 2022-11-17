@@ -23,6 +23,7 @@ from typing import List
 
 import torch.jit
 import torch.nn as nn
+from torch.distributions import Distribution
 
 from torch.distributions.dirichlet import Dirichlet
 from torch.distributions.categorical import Categorical
@@ -60,7 +61,7 @@ def gaussian_basis_function(x, means, stds, epsilon: float = 1e-2):
     return (- 0.5 * ((x - means) / stds) ** 2).exp() / (stds * (2 * torch.pi) ** 0.5)
 
 
-class RandomTP():
+class RandomTP(Distribution):
     """Sample channel masks with Dirichlet distribution concentration 
        [channel_prob_2d_only, channel_prob_2d_3d, channel_prob_3d_only]
        
@@ -79,8 +80,9 @@ class RandomTP():
                                       channel_prob_3d_only])
 
         self.dirichlet = Dirichlet(concentration)
+        super().__init__(validate_args=False)
     
-    def sample(size):
+    def sample(self, sample_shape=torch.Size()):
         dist = self.dirichlet.sample()
         channel_dist = Categorical(probs=dist)
-        return channel_dist.sample(size)
+        return channel_dist.sample(sample_shape)

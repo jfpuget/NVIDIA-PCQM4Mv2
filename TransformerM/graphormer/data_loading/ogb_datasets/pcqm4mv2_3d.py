@@ -96,7 +96,7 @@ def mol2graph(mol):
 
 
 class Pyg3DPCQM4Mv2Dataset(InMemoryDataset):
-    def __init__(self, root='dataset', use_sdf=True, transform=None, pre_transform=None):
+    def __init__(self, root='dataset', use_sdf=True, compute_descriptors=False, transform=None, pre_transform=None):
         self.original_root = root
         self.folder = osp.join(root, 'pcqm4m-v2-3d')
         self.version = 1
@@ -105,6 +105,7 @@ class Pyg3DPCQM4Mv2Dataset(InMemoryDataset):
         self.url = 'https://dgl-data.s3-accelerate.amazonaws.com/dataset/OGB-LSC/pcqm4m-v2.zip'
         self.url_3d = 'http://ogb-data.stanford.edu/data/lsc/pcqm4m-v2-train.sdf.tar.gz'
 
+        self.compute_descriptors = compute_descriptors
         # check version and update if necessary
         if osp.isdir(self.folder) and (
                 not osp.exists(osp.join(self.folder, f'RELEASE_v{self.version}.txt'))):
@@ -162,28 +163,31 @@ class Pyg3DPCQM4Mv2Dataset(InMemoryDataset):
         else:
             data.node_pos = torch.zeros(int(graph['num_nodes']), 3)
 
-        self.dc_memmap[idx] = np.asarray(RDKit2DNormalized().process(smile), dtype=np.float32)
-        self.fp_memmap[idx] = np.asarray(Chem.RDKFingerprint(mol, minPath=1, maxPath=7, fpSize=512), dtype=np.int64)
+        if self.compute_descriptors:
+            self.dc_memmap[idx] = np.asarray(RDKit2DNormalized().process(smile), dtype=np.float32)
+            self.fp_memmap[idx] = np.asarray(Chem.RDKFingerprint(mol, minPath=1, maxPath=7, fpSize=512), dtype=np.int64)
         return data
 
     def process(self):
         structures = Chem.SDMolSupplier(osp.join(self.raw_dir, 'pcqm4m-v2-train.sdf'),
                                         strictParsing=False)
         data_df = pd.read_csv(osp.join(self.raw_dir, 'data.csv.gz'))
-        fp_memmap = self.original_root / 'pcqm-dpfp' / 'fingerprint.np'
-        dc_memmap = self.original_root / 'pcqm-dpfp' / 'descriptor.np'
-        os.makedirs(self.original_root / 'pcqm-dpfp', exist_ok=True)
-        self.fp_memmap = np.memmap(
-            fp_memmap,
-            dtype='float32',
-            mode='w+',
-            shape=(3746620, 512)
-        )
-        self.dc_memmap = np.memmap(
-            dc_memmap,
-            dtype='float32',
-            mode='w+',
-            shape=(3746620, 201)
+       
+        if self.compute_descriptors:
+            fp_memmap = self.original_root / 'pcqm-dpfp' / 'fingerprint.np'
+            dc_memmap = self.original_root / 'pcqm-dpfp' / 'descriptor.np'
+            os.makedirs(self.original_root / 'pcqm-dpfp', exist_ok=True)
+            self.fp_memmap = np.memmap(
+                fp_memmap,
+                dtype='float32',
+                mode='w+',
+                shape=(3746620, 512)
+            )
+            self.dc_memmap = np.memmap(
+                dc_memmap,
+                dtype='float32',
+                mode='w+',
+                shape=(3746620, 201)
         )
         print('Converting SMILES strings into graphs...')
         data_list = [self.process_item(*ll) for ll in tqdm(

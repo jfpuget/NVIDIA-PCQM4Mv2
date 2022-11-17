@@ -39,6 +39,7 @@ OGB_DATASETS = [
         "ogbg-molhiv",
         "ogbg-molpcba",
         "pcqm4mv2-3d",
+        "pcqm4mv2-3d-descriptor",
         "pcqm4mv2",
         "pcqm4m"
         ]
@@ -58,6 +59,11 @@ class OGBDatasetLookupTable:
             path.mkdir(parents=True, exist_ok=True)
             (path / "RELEASE_v1.txt").touch(exist_ok=True)
             return Pyg3DPCQM4Mv2Dataset(**args)
+        elif dataset_name == "pcqm4mv2-3d-descriptor":
+            path = Path(args["root"]) / "pcqm4m-v2-3d-descriptor"
+            path.mkdir(parents=True, exist_ok=True)
+            (path / "RELEASE_v1.txt").touch(exist_ok=True)
+            return Pyg3DPCQM4Mv2Dataset(compute_descriptors=True, **args)
         elif dataset_name == "pcqm4mv2":
             path = Path(args["root"]) / "pcqm4m-v2"
             path.mkdir(parents=True, exist_ok=True)
@@ -84,15 +90,16 @@ class OGBDatasetLookupTable:
                 data_dir=data_dir, **kwargs)
 
         idx_split = inner_dataset.get_idx_split()
-
         if kwargs.get('cv_fold_path'):
             cv_fold = kwargs['cv_fold_idx']
             splits = torch.load(str(kwargs['cv_fold_path']))
             train_idx, valid_idx = splits[f'train_{cv_fold}'], splits[f'valid_{cv_fold}']
+        elif kwargs.get('full_train', False):
+            train_idx = torch.concat([idx_split['train'], idx_split['valid']])
+            valid_idx = idx_split["test-challenge" if "pcqm4mv2" in dataset_name else "test"]
         else:
             train_idx = idx_split['train']
             valid_idx = idx_split["valid"]
 
         test_idx = idx_split["test-challenge" if "pcqm4mv2" in dataset_name else "test"]
-
         return GraphormerPYGDataset(inner_dataset, seed, train_idx, valid_idx, test_idx, **kwargs)

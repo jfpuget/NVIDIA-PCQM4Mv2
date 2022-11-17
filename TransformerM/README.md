@@ -1,20 +1,22 @@
 # Transformer-M
 
-## Build and run the container
+## Environment Setup
 
-With the latest docker with GPU support:
+Build and run the container using [docker](https://www.docker.com/)
 
 ```bash
 # build the container
 docker build -t transformerm .
 mkdir results data
 # copy custom folds
-cp ../new_split_dict.pt data/
+cp ../data/new_split_dict.pt data/
 # run the container interactively
-docker run -it --gpus=all --ipc=host --rm -v ${PWD}/results:/results -v ${PWD}/data:/data transformerm
+docker run -it --gpus=all --ipc=host --rm -v $(pwd)/../ensemble/models_oofs/predictions:/logs -v $(pwd)/results:/results -v $(pwd)/data:/data transformerm
+export FOLD_IDX=0
+export FOLD_PATH=/data/new_split_dict.pt
 ```
 
-## Training
+## Training Commands
 
 ### $\textrm{Transformer-M}^\textrm{base}_\textrm{without\\_denoising}$
 
@@ -42,13 +44,15 @@ python -m torch.distributed.run --nnodes=1 --nproc_per_node=8 --max_restarts 0 -
 --batch-size 128 \
 --amp \
 --epochs 400 \
---ckpt-interval 10 \
---eval-interval 10 \
---save-ckpt-path /results/checkpoint_pcqm4mv2.pth \
---data_dir /data \
---log-dir /results
---cv-fold-path /data/new_split_dict.pt
---cv-fold-idx 0
+--ckpt-interval 20 \
+--eval-interval 20 \
+--save-ckpt-path /results/transformer_base_without_denoising_${FOLD_IDX}.pth \
+--data-dir /data \
+--log-dir /logs/transformer_base_without_denoising_${FOLD_IDX} \
+--prediction-name valid.npy \
+--cv-fold-path $FOLD_PATH \
+--cv-fold-idx $FOLD_IDX \
+--seed 42 \
 --wandb
 ```
 
@@ -79,30 +83,143 @@ python -m torch.distributed.run --nnodes=1 --nproc_per_node=8 --max_restarts 0 -
 --batch-size 128 \
 --amp \
 --epochs 400 \
---ckpt-interval 10 \
---eval-interval 10 \
---save-ckpt-path /results/checkpoint_pcqm4mv2.pth \
---data_dir /data \
---log-dir /results
---cv-fold-path /data/new_split_dict.pt
---cv-fold-idx 0
+--ckpt-interval 20 \
+--eval-interval 20 \
+--save-ckpt-path /results/transformer_large_with_denoising_${FOLD_IDX}.pth \
+--data-dir /data \
+--log-dir /logs/transformer_large_with_denoising_${FOLD_IDX} \
+--prediction-name valid.npy \
+--cv-fold-path $FOLD_PATH \
+--cv-fold-idx $FOLD_IDX \
+--seed 42 \
 --wandb
 ```
 
-### sajad v1
+### $\textrm{Transformer-M}^{\textrm{large}}_{\textrm{baseline}}$
 
-### sajad v2
+```
+python -m torch.distributed.run --nnodes=1 --nproc_per_node=8 --max_restarts 0 --module graphormer.runtime.training \
+--dataset-source ogb --dataset-name pcqm4mv2-3d \
+--num-workers 8 \
+--criterion l1_loss atom_denoise_loss \
+--metric mae \
+--architecture medium-768 \
+--num-classes 1 \
+--attention-dropout 0.1 \
+--act-dropout 0.1 \
+--dropout 0.0 \
+--drop-path-prob 0.1 \
+--position-noise 0.2 \
+--channel-prob-2d-only 0.2 \
+--channel-prob-3d-only 0.2 \
+--channel-prob-2d-3d 0.6 \
+--gradient-clip 5.0 \
+--weight-decay 0.0 \
+--warmup-updates 150000 \
+--learning-rate 2e-4 \
+--end-learning-rate 1e-9 \
+--batch-size 128 \
+--amp \
+--epochs 454 \
+--save-ckpt-path /results/transformer_large_baseline_${FOLD_IDX}.pth \
+--ckpt-interval 20 \
+--eval-interval 20 \
+--data-dir /data \
+--log-dir /logs/transformer_large_baseline_${FOLD_IDX} \
+--prediction-name valid.npy \
+--cv-fold-idx $FOLD_IDX \
+--cv-fold-path $FOLD_PATH \
+--seed 42 \ # and 123
+--wandb
+```
 
-### sajad v2-0.2
+For these variants, they were also trained on the full train+valid. To do so, **remove** the arguments `--cv-fold-idx`, `--cv-fold-path`, and **add** `--full-train` argument to the above command.
 
-### sajad v4
+### $\textrm{Transformer-M}^{\textrm{large}}_{\textrm{Dirichlet}}$
 
-### sajad v5
+```
+python -m torch.distributed.run --nnodes=1 --nproc_per_node=8 --max_restarts 0 --module graphormer.runtime.training \
+--dataset-source ogb --dataset-name pcqm4mv2-3d \
+--num-workers 8 \
+--criterion l1_loss atom_denoise_loss \
+--metric mae \
+--architecture medium-768 \
+--num-classes 1 \
+--attention-dropout 0.1 \
+--act-dropout 0.1 \
+--dropout 0.0 \
+--drop-path-prob 0.1 \
+--position-noise 0.2 \
+--random-tp \
+--channel-prob-2d-only 0.2 \
+--channel-prob-3d-only 0.2 \
+--channel-prob-2d-3d 0.6 \
+--gradient-clip 5.0 \
+--weight-decay 0.0 \
+--warmup-updates 150000 \
+--learning-rate 2e-4 \
+--end-learning-rate 1e-9 \
+--batch-size 128 \
+--amp \
+--epochs 454 \
+--save-ckpt-path /results/transformer_large_dirichlet_${FOLD_IDX}.pth \
+--ckpt-interval 20 \
+--eval-interval 20 \
+--data-dir /data \
+--log-dir /logs/transformer_large_dirichlet_${FOLD_IDX} \
+--prediction-name valid.npy \
+--cv-fold-idx $FOLD_IDX \
+--cv-fold-path $FOLD_PATH \
+--seed 1341 \
+--wandb
+```
 
+### $\textrm{Transformer-M}_{\textrm{kpgt}}^{\textrm{large}}$
+
+```
+python -m torch.distributed.run --nnodes=1 --nproc_per_node=8 --max_restarts 0 --module graphormer.runtime.training \
+--dataset-source ogb --dataset-name pcqm4mv2-3d-descriptor \
+--num-workers 8 \
+--criterion l1_loss atom_denoise_loss kpgt_loss \
+--metric mae \
+--architecture medium-768 \
+--num-classes 1 \
+--attention-dropout 0.1 \
+--act-dropout 0.1 \
+--dropout 0.0 \
+--drop-path-prob 0.1 \
+--position-noise 0.2 \
+--channel-prob-2d-only 0.2 \
+--channel-prob-3d-only 0.2 \
+--channel-prob-2d-3d 0.6 \
+--gradient-clip 5.0 \
+--weight-decay 0.0 \
+--warmup-updates 150000 \
+--learning-rate 2e-4 \
+--end-learning-rate 1e-9 \
+--batch-size 128 \
+--amp \
+--epochs 454 \
+--save-ckpt-path /results/transformer_large_kpgt_${FOLD_IDX}.pth \
+--ckpt-interval 20 \
+--eval-interval 20 \
+--data-dir /data \
+--log-dir /logs/transformer_large_kpgt_${FOLD_IDX} \
+--prediction-name valid.npy \
+--cv-fold-idx $FOLD_IDX \
+--cv-fold-path $FOLD_PATH \
+--kpgt-loss-weight-fp 0.1 \ # and 0.2
+--kpgt-loss-weight-dc 0.1 \ # and 0.2
+--position-noise 0.2 \
+--seed 1341 \
+--wandb
+```
+
+For these variants, a model ($\lambda=0.1$) was also trained on the full train+valid. To do so, **remove** the arguments `--cv-fold-idx`, `--cv-fold-path`, and **add** `--full-train` argument to the above command.
 
 ## Inference
 
-To run inference, run the same command as for training, replacing `graphormer.runtime.training` with `graphormer.runtime.inference` and providing a `load-ckpt-path` argument.
+To run inference, run the same command as for training, replacing `graphormer.runtime.training` with `graphormer.runtime.inference`, providing a `load-ckpt-path` argument, and setting `--prediction-name testchallenge.npy`.
 
 
 ## References

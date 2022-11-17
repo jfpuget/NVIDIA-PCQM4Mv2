@@ -49,6 +49,8 @@ class GraphormerPYGDataset(Dataset):
             self.num_data = len(self.dataset)
 
         self.seed = seed
+        self.train_data, self.valid_data, self.test_data = None, None, None
+
         if train_idx is None and train_set is None:
             train_valid_idx, test_idx = train_test_split(
                 np.arange(self.num_data),
@@ -77,6 +79,7 @@ class GraphormerPYGDataset(Dataset):
             self.train_idx = train_idx
             self.valid_idx = valid_idx
             self.test_idx = test_idx
+            
             self.train_data = self.index_select(self.train_idx)
             self.valid_data = self.index_select(self.valid_idx)
             self.test_data = self.index_select(self.test_idx)
@@ -84,6 +87,8 @@ class GraphormerPYGDataset(Dataset):
         self.__indices__ = None
 
     def index_select(self, idx):
+        if not len(idx):
+            return torch.Tensor([])
         dataset = copy.copy(self)
         dataset.dataset = self.dataset.index_select(idx)
         if isinstance(idx, torch.Tensor):
