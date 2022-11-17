@@ -31,7 +31,7 @@ The above trains 4 models, one for each validation fold. Predictions are then co
 
 `
 python cpmp_final_script.py --fname cpmp_256_bs64_lr1e-4 --input_dir /raid/pcqm4mv2ring --output_dir ../checkpoints \
-  --split_path ../input/new_split_dict.pt --infer_dir ../preds --cuda_devices 0
+  --split_path ../input/new_split_dict.pt --infer_dir ../ensemble/models_oofs/predictions --cuda_devices 0
 `
 
 All the code was run in a `nvidia/pytorch:22.08-py3` container. We installed these packages in the container before running the code:
