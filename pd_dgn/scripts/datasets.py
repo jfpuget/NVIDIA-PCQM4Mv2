@@ -11,7 +11,7 @@ def get_ds(root, use_kfold=False, fold=None):
     split_dict = pyg_dataset.get_idx_split()
     if use_kfold:
         assert fold is not None
-        new_split_dict = torch.load(f'{root}/new_split_dict.pt')
+        new_split_dict = torch.load(f'../../data/new_split_dict.pt')
         train_idx = new_split_dict[f'train_{fold}']
         valid_idx = new_split_dict[f'valid_{fold}']
     else:
