@@ -15,6 +15,28 @@ docker run -it --gpus=all --ipc=host --rm -v $(pwd)/../ensemble/models_oofs/pred
 export FOLD_IDX=0
 export FOLD_PATH=/data/new_split_dict.pt
 ```
+## Dataset
+
+By running the corresponding commands below, the dataset will be downloaded and preprocessed, if the data hasn't been preprocessed apriori at the `--data_dir` location.
+
+For the case where `--dataset-name` is `pcqm4mv2-3d-descriptor` it may take up to 48 hours or more to preprocess the complete data. Instead you could download the corresponding files from [here](https://drive.google.com/drive/folders/15Fx4UzQN8KNUedmNMYmbd1YkF1K3zXZZ?usp=share_link) and set the `--data_dir` to the location where the files are downloaded to. For example if the files are extracted in `/workspace/data/` then `--data_dir` to this path with the following content:
+
+```
+/workspace/data/
+├── pcqm4m-v2-3d-descriptor
+│   ├── processed
+│   │   ├── geometric_data_processed.pt
+│   │   ├── pre_filter.pt
+│   │   └── pre_transform.pt
+│   ├── raw
+│   │   ├── data.csv.gz
+│   │   └── pcqm4m-v2-train.sdf
+│   ├── RELEASE_v1.txt
+│   └── split_dict.pt
+└── pcqm-dpfp
+    ├── descriptor.np
+    └── fingerprint.np
+```
 
 ## Training Commands
 
