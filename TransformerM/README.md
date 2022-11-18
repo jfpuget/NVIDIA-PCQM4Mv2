@@ -68,13 +68,21 @@ python -m torch.distributed.run --nnodes=1 --nproc_per_node=8 --max_restarts 0 -
 --epochs 400 \
 --ckpt-interval 20 \
 --eval-interval 20 \
---save-ckpt-path /results/transformer_base_without_denoising_${FOLD_IDX}.pth \
+--save-ckpt-path /results/${NAME}_fold${FOLD_IDX}.pth \
 --data-dir /data \
---log-dir /logs/transformer_base_without_denoising_${FOLD_IDX} \
+--log-dir /logs/${NAME}_fold${FOLD_IDX} \
 --prediction-name valid.npy \
 --cv-fold-path $FOLD_PATH \
 --cv-fold-idx $FOLD_IDX \
 --seed 42
+```
+
+Run it 4 times (one for each fold) with
+```
+NAME=alexandrem_tm18_nonodepred_400 FOLD_IDX=0
+NAME=alexandrem_tm18_nonodepred_400 FOLD_IDX=1
+NAME=alexandrem_tm18_nonodepred_400 FOLD_IDX=2
+NAME=alexandrem_tm18_nonodepred_400 FOLD_IDX=3
 ```
 
 ### $\textrm{Transformer-M}^\textrm{large}_\textrm{with\\_denoising}$
@@ -107,13 +115,20 @@ python -m torch.distributed.run --nnodes=1 --nproc_per_node=8 --max_restarts 0 -
 --epochs 400 \
 --ckpt-interval 20 \
 --eval-interval 20 \
---save-ckpt-path /results/transformer_large_with_denoising_${FOLD_IDX}.pth \
+--save-ckpt-path /results/${NAME}_fold${FOLD_IDX}.pth \
 --data-dir /data \
---log-dir /logs/transformer_large_with_denoising_${FOLD_IDX} \
+--log-dir /logs/${NAME}_fold${FOLD_IDX} \
 --prediction-name valid.npy \
 --cv-fold-path $FOLD_PATH \
---cv-fold-idx $FOLD_IDX \
---seed 42
+--cv-fold-idx $FOLD_IDX
+```
+
+Run it 4 times (one for each fold) with
+```
+NAME=alexandrem_tm18forreal_withnodepred_400_2 FOLD_IDX=0
+NAME=alexandrem_tm18forreal_withnodepred_400_2 FOLD_IDX=1
+NAME=alexandrem_tm18forreal_withnodepred_400_2 FOLD_IDX=2
+NAME=alexandrem_tm18forreal_withnodepred_400_2 FOLD_IDX=3
 ```
 
 ### $\textrm{Transformer-M}^{\textrm{large}}_{\textrm{baseline}}$
@@ -143,18 +158,30 @@ python -m torch.distributed.run --nnodes=1 --nproc_per_node=8 --max_restarts 0 -
 --batch-size 128 \
 --amp \
 --epochs 454 \
---save-ckpt-path /results/transformer_large_baseline_${FOLD_IDX}.pth \
 --ckpt-interval 20 \
 --eval-interval 20 \
+--save-ckpt-path /results/${NAME}_fold${FOLD_IDX}.pth \
 --data-dir /data \
---log-dir /logs/transformer_large_baseline_${FOLD_IDX} \
+--log-dir /logs/${NAME}_fold${FOLD_IDX} \
 --prediction-name valid.npy \
 --cv-fold-idx $FOLD_IDX \
 --cv-fold-path $FOLD_PATH \
---seed 42 # and 123
+--seed $SEED
 ```
 
-For this variants, it was also trained on the full train+valid. To do so, **remove** the arguments `--cv-fold-idx`, `--cv-fold-path`, and **add** `--full-train` argument to the above command.
+Run it 8 times (two for each fold) with
+```
+NAME=sajad_blv4_no_dihedral_18l_val SEED=42 FOLD_IDX=0
+NAME=sajad_blv4_no_dihedral_18l_val SEED=42 FOLD_IDX=0
+NAME=sajad_blv4_no_dihedral_18l_val SEED=42 FOLD_IDX=0
+NAME=sajad_blv4_no_dihedral_18l_val SEED=42 FOLD_IDX=0
+
+NAME=sajad_blv5__18l_454_3407_val SEED=3407 FOLD_IDX=0
+NAME=sajad_blv5__18l_454_3407_val SEED=3407 FOLD_IDX=1
+NAME=sajad_blv5__18l_454_3407_val SEED=3407 FOLD_IDX=2
+NAME=sajad_blv5__18l_454_3407_val SEED=3407 FOLD_IDX=3
+```
+
 
 ### $\textrm{Transformer-M}^{\textrm{large}}_{\textrm{Dirichlet}}$
 
@@ -184,15 +211,30 @@ python -m torch.distributed.run --nnodes=1 --nproc_per_node=8 --max_restarts 0 -
 --batch-size 128 \
 --amp \
 --epochs 454 \
---save-ckpt-path /results/transformer_large_dirichlet_${FOLD_IDX}.pth \
 --ckpt-interval 20 \
 --eval-interval 20 \
+--save-ckpt-path /results/${NAME}_fold${FOLD_IDX}.pth \
 --data-dir /data \
---log-dir /logs/transformer_large_dirichlet_${FOLD_IDX} \
+--log-dir /logs/${NAME}_fold${FOLD_IDX} \
 --prediction-name valid.npy \
 --cv-fold-idx $FOLD_IDX \
 --cv-fold-path $FOLD_PATH \
---seed 1341
+--seed 3407
+```
+
+Run it 4 times (one for each fold) with
+
+```
+NAME=sajad_blv1_18l_454_3407_val FOLD_IDX=0
+NAME=sajad_blv1_18l_454_3407_val FOLD_IDX=1
+NAME=sajad_blv1_18l_454_3407_val FOLD_IDX=2
+NAME=sajad_blv1_18l_454_3407_val FOLD_IDX=3
+```
+
+For this variant, it was also trained on the full train+valid. To do so, **remove** the arguments `--cv-fold-idx`, `--cv-fold-path`, and **add** `--full-train` argument to the above command, and run with the following environment:
+
+```
+NAME=sajad_blv1_full_train
 ```
 
 ### $\textrm{Transformer-M}_{\textrm{kpgt}}^{\textrm{large}}$
@@ -222,21 +264,40 @@ python -m torch.distributed.run --nnodes=1 --nproc_per_node=8 --max_restarts 0 -
 --batch-size 128 \
 --amp \
 --epochs 454 \
---save-ckpt-path /results/transformer_large_kpgt_${FOLD_IDX}.pth \
 --ckpt-interval 20 \
 --eval-interval 20 \
+--save-ckpt-path /results/${NAME}_fold${FOLD_IDX}.pth \
 --data-dir /data \
---log-dir /logs/transformer_large_kpgt_${FOLD_IDX} \
+--log-dir /logs/${NAME}_fold${FOLD_IDX} \
 --prediction-name valid.npy \
 --cv-fold-idx $FOLD_IDX \
 --cv-fold-path $FOLD_PATH \
---kpgt-loss-weight-fp 0.1 \
---kpgt-loss-weight-dc 0.1 \
+--kpgt-loss-weight-fp $LAMBDA \
+--kpgt-loss-weight-dc $LAMBDA \
 --position-noise 0.2 \
---seed 1341
+--seed 3407
 ```
 
-Two models were trained with $\lambda=0.1$ and $\lambda=0.2$ corresponding to the weights of the parameters `--kpgt-loss-weight-fp` and `--kpgt-loss-weight-dc`. For these variants, they were also trained on the full train+valid. To do so, **remove** the arguments `--cv-fold-idx`, `--cv-fold-path`, and **add** `--full-train` argument to the above command.
+Run it 8 times (two for each fold) with
+
+```
+NAME=sajad_blv2_r_0.1_18l_454_3407_val LAMBDA=0.1 FOLD_IDX=0
+NAME=sajad_blv2_r_0.1_18l_454_3407_val LAMBDA=0.1 FOLD_IDX=1
+NAME=sajad_blv2_r_0.1_18l_454_3407_val LAMBDA=0.1 FOLD_IDX=2
+NAME=sajad_blv2_r_0.1_18l_454_3407_val LAMBDA=0.1 FOLD_IDX=3
+
+NAME=sajad_blv2-0.2_18l_val LAMBDA=0.2 FOLD_IDX=0
+NAME=sajad_blv2-0.2_18l_val LAMBDA=0.2 FOLD_IDX=1
+NAME=sajad_blv2-0.2_18l_val LAMBDA=0.2 FOLD_IDX=2
+NAME=sajad_blv2-0.2_18l_val LAMBDA=0.2 FOLD_IDX=3
+```
+
+Two models were trained with $\lambda=0.1$ and $\lambda=0.2$ corresponding to the weights of the parameters `--kpgt-loss-weight-fp` and `--kpgt-loss-weight-dc`. For these variants, they were also trained on the full train+valid. To do so, **remove** the arguments `--cv-fold-idx`, `--cv-fold-path`, and **add** `--full-train` argument to the above command, and run with the following environment:
+
+```
+NAME=sajad_blv2_full_train LAMBDA=0.1
+NAME=sajad_blv2-0.2_full_train LAMBDA=0.2
+```
 
 ## Inference
 

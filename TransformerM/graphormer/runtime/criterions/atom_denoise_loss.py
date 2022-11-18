@@ -40,9 +40,11 @@ class AtomDenoiseLoss(Metric):
                channels_3d_mask: Tensor=None, 
                targets: Tensor=None, 
                node_pos: Tensor=None, **_):
-
-        if node_pos_head is None or channels_3d_mask is None:
+        
+        if node_pos_head is None:
             return 0.0
+        elif channels_3d_mask is None:
+            return node_pos_head.mean() * 0.0
         n = node_pos_head.shape[0]
         mask = (node_pos == 0.0).all(dim=-1, keepdim=True)[channels_3d_mask]
         pos_noise = pos_noise[channels_3d_mask]
@@ -57,7 +59,7 @@ class AtomDenoiseLoss(Metric):
         n_nnm = n_nnm.masked_fill(n_nnm == 0.0, 1.0)
         error = (loss / n_nnm).sum()
         if torch.isnan(error):
-            error = torch.tensor(0.0).to(preds.device)
+            error = node_pos_head.mean() * 0.0
         else:
             self.total += n
             self.error += error.detach()

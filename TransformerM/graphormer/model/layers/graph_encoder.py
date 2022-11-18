@@ -277,17 +277,15 @@ class GraphormerGraphEncoder(nn.Module):
         edge_3d_bias, atom_3d_feats, delta_pos = None, None, None
         channels_2d_mask, channels_3d_mask = None, None
         pos_noise = None
-        out = {}
         if self.training and 'node_pos' in batched_data and 'node_type_pair' in batched_data:
             channels_idx = self.channels_distribution.sample((data_x.shape[0],))
             channels_2d_mask, channels_3d_mask = channels_idx <= 1, channels_idx >= 1
-            out["channels_3d_mask"] = channels_3d_mask
-            out["channels_2d_mask"] = channels_2d_mask
+
             if channels_3d_mask.any():
                 node_pos = batched_data['node_pos']
                 pos_noise = torch.randn_like(node_pos) * self.position_noise
                 node_pos = node_pos + pos_noise
-                out["pos_noise"] = pos_noise
+
                 edge_3d_bias, atom_3d_feats, delta_pos = self.channel_3d(
                     node_pos[channels_3d_mask],
                     batched_data['node_type_pair'][channels_3d_mask],
@@ -327,20 +325,25 @@ class GraphormerGraphEncoder(nn.Module):
                 x,
                 self_attn_bias=attn_bias,
             )
-        out["pred"] = x
+
         # - kpgt
         kpgt_out = None
         if self.kpgt_head is not None:
             kpgt_out = self.kpgt_head(
                 graph_reps=x[0, :, :],
                 indices=batched_data['idx'])
-            out["kpgt"] = kpgt_out
 
         node_pos_head = None
         if self.training and delta_pos is not None and hasattr(self, 'node_pos_head'):
             node_pos_head = self.node_pos_head(
                 x[1:, channels_3d_mask], attn_bias[channels_3d_mask, :, 1:, 1:], delta_pos
             )
-            out["node_pos_head"] = node_pos_head
-        
-        return out
+
+        return dict(
+            pred=x,
+            node_pos_head=node_pos_head,
+            pos_noise=pos_noise,
+            channels_3d_mask=channels_3d_mask,
+            channels_2d_mask=channels_2d_mask,
+            kpgt=kpgt_out,
+        )
