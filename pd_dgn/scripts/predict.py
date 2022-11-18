@@ -55,7 +55,7 @@ def gnn_predict(quick_run, yaml_path):
         yp_testchallenge = trainer.predict(model, testchallenge_dl, ckpt_path=ckpt)
         yp_testchallenge = torch.cat(yp_testchallenge,dim=0)
         
-        save_path = f'{PRED_PATH}_fold{c}_valid_{scores[c]}'
+        save_path = f'{PRED_PATH}_fold{c}_valid'
         Path(save_path).mkdir(parents=True, exist_ok=True)
         np.save(f'{save_path}/valid.npy', yp_valid.detach().cpu().float().numpy())
         np.save(f'{save_path}/testdev.npy', yp_testdev.detach().cpu().float().numpy())
