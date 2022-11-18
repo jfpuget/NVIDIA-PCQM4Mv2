@@ -6,3 +6,5 @@ In order to reproduce our solution one has to execute code in directories. Each 
 - Create training folds by running the code in the data directory.
 - Train models by running code in these directories (order is not important): cnn, modelcular_transformer, pd_dgn, TransformerM. Each of these downloads a variant of the competition dataset.
 - Run the ensembling notebook in ensemble directory.
+
+The PDF document describes our solution. We may publish it to arxiv later.
