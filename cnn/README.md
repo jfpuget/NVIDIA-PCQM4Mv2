@@ -1,6 +1,6 @@
 Train using a image representation from molecules graphs.
 
-Images created using rdkit. Run `create-images.ipynb`
+Images are created using rdkit. Run `create-images.ipynb`
 
 - Input: smiles string. Put competition data in `../dataset` directory.
 - Output: 384x384 rgb image. Images in `../images` directory.
@@ -18,3 +18,5 @@ The training run has 4 stages. At each stage the image size, number of epochs an
 - Stage 4: LR: 2.5e-5, Image size: 352, epochs: 12
 
 The average MAE is: 0.0983
+
+We also provide code to train an efficient net model. This model is not used in the end in our ensemble but it is actually better than the resnet model when used standalone.
