@@ -97,9 +97,12 @@ class KPGTPretextLoss(Metric):
         self.orig_vals = None
 
         self.amp = kwargs['amp']
-        data_dir = Path(kwargs['data_dir'])
-        fp_memmap = data_dir / 'pcqm-dpfp' / 'fingerprint.np'
-        dc_memmap = data_dir / 'pcqm-dpfp' / 'descriptor.np'
+        self.data_dir = Path(kwargs['data_dir'])
+        self.fp_memmap = None
+        self.dc_memmap = None
+
+        fp_memmap = self.data_dir / 'pcqm-dpfp' / 'fingerprint.np'
+        dc_memmap = self.data_dir / 'pcqm-dpfp' / 'descriptor.np'
         self.kpgt_dc_criterion = torch.nn.MSELoss()
         self.kpgt_fp_criterion = torch.nn.BCEWithLogitsLoss(pos_weight=FINGERPRINT_POS_WEIGHTS.to('cuda'))
 

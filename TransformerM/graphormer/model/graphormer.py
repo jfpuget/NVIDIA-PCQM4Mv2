@@ -67,7 +67,6 @@ class GraphormerModel(nn.Module):
             random_tp=args.random_tp,
             kpgt=(args.kpgt_loss_weight_dc or args.kpgt_loss_weight_fp)
         )
-
         self.head_transform = nn.Linear(args.encoder_embed_dim, args.encoder_embed_dim)
         self.activation_fn = get_activation_fn(args.activation_fn)
         self.layer_norm = nn.LayerNorm(args.encoder_embed_dim)
@@ -157,13 +156,13 @@ class GraphormerModel(nn.Module):
             '--kpgt-loss-weight-dc',
             type=float,
             default=0.0,
-            help='KPGT loss weight dc',
+            help='KPGT loss weight descriptors',
         )
         parser.add_argument(
             '--kpgt-loss-weight-fp',
             type=float,
             default=0.0,
-            help='KPGT loss weight FP',
+            help='KPGT loss weight fingerprints',
         )
 
         tm = parser.add_argument_group('Transformer-M')

@@ -74,8 +74,7 @@ python -m torch.distributed.run --nnodes=1 --nproc_per_node=8 --max_restarts 0 -
 --prediction-name valid.npy \
 --cv-fold-path $FOLD_PATH \
 --cv-fold-idx $FOLD_IDX \
---seed 42 \
---wandb
+--seed 42
 ```
 
 ### $\textrm{Transformer-M}^\textrm{large}_\textrm{with\\_denoising}$
@@ -86,6 +85,7 @@ python -m torch.distributed.run --nnodes=1 --nproc_per_node=8 --max_restarts 0 -
 --dataset-source ogb --dataset-name pcqm4mv2-3d \
 --num-workers 8 \
 --criterion l1_loss atom_denoise_loss \
+--node-pos-head \
 --metric mae \
 --architecture medium-768 \
 --num-classes 1 \
@@ -113,8 +113,7 @@ python -m torch.distributed.run --nnodes=1 --nproc_per_node=8 --max_restarts 0 -
 --prediction-name valid.npy \
 --cv-fold-path $FOLD_PATH \
 --cv-fold-idx $FOLD_IDX \
---seed 42 \
---wandb
+--seed 42
 ```
 
 ### $\textrm{Transformer-M}^{\textrm{large}}_{\textrm{baseline}}$
@@ -124,6 +123,7 @@ python -m torch.distributed.run --nnodes=1 --nproc_per_node=8 --max_restarts 0 -
 --dataset-source ogb --dataset-name pcqm4mv2-3d \
 --num-workers 8 \
 --criterion l1_loss atom_denoise_loss \
+--node-pos-head \
 --metric mae \
 --architecture medium-768 \
 --num-classes 1 \
@@ -151,11 +151,10 @@ python -m torch.distributed.run --nnodes=1 --nproc_per_node=8 --max_restarts 0 -
 --prediction-name valid.npy \
 --cv-fold-idx $FOLD_IDX \
 --cv-fold-path $FOLD_PATH \
---seed 42 \ # and 123
---wandb
+--seed 42 # and 123
 ```
 
-For these variants, they were also trained on the full train+valid. To do so, **remove** the arguments `--cv-fold-idx`, `--cv-fold-path`, and **add** `--full-train` argument to the above command.
+For this variants, it was also trained on the full train+valid. To do so, **remove** the arguments `--cv-fold-idx`, `--cv-fold-path`, and **add** `--full-train` argument to the above command.
 
 ### $\textrm{Transformer-M}^{\textrm{large}}_{\textrm{Dirichlet}}$
 
@@ -164,6 +163,7 @@ python -m torch.distributed.run --nnodes=1 --nproc_per_node=8 --max_restarts 0 -
 --dataset-source ogb --dataset-name pcqm4mv2-3d \
 --num-workers 8 \
 --criterion l1_loss atom_denoise_loss \
+--node-pos-head \
 --metric mae \
 --architecture medium-768 \
 --num-classes 1 \
@@ -192,8 +192,7 @@ python -m torch.distributed.run --nnodes=1 --nproc_per_node=8 --max_restarts 0 -
 --prediction-name valid.npy \
 --cv-fold-idx $FOLD_IDX \
 --cv-fold-path $FOLD_PATH \
---seed 1341 \
---wandb
+--seed 1341
 ```
 
 ### $\textrm{Transformer-M}_{\textrm{kpgt}}^{\textrm{large}}$
@@ -203,6 +202,7 @@ python -m torch.distributed.run --nnodes=1 --nproc_per_node=8 --max_restarts 0 -
 --dataset-source ogb --dataset-name pcqm4mv2-3d-descriptor \
 --num-workers 8 \
 --criterion l1_loss atom_denoise_loss kpgt_loss \
+--node-pos-head \
 --metric mae \
 --architecture medium-768 \
 --num-classes 1 \
@@ -230,14 +230,13 @@ python -m torch.distributed.run --nnodes=1 --nproc_per_node=8 --max_restarts 0 -
 --prediction-name valid.npy \
 --cv-fold-idx $FOLD_IDX \
 --cv-fold-path $FOLD_PATH \
---kpgt-loss-weight-fp 0.1 \ # and 0.2
---kpgt-loss-weight-dc 0.1 \ # and 0.2
+--kpgt-loss-weight-fp 0.1 \
+--kpgt-loss-weight-dc 0.1 \
 --position-noise 0.2 \
---seed 1341 \
---wandb
+--seed 1341
 ```
 
-For these variants, a model ($\lambda=0.1$) was also trained on the full train+valid. To do so, **remove** the arguments `--cv-fold-idx`, `--cv-fold-path`, and **add** `--full-train` argument to the above command.
+Two models were trained with $\lambda=0.1$ and $\lambda=0.2$ corresponding to the weights of the parameters `--kpgt-loss-weight-fp` and `--kpgt-loss-weight-dc`. For these variants, they were also trained on the full train+valid. To do so, **remove** the arguments `--cv-fold-idx`, `--cv-fold-path`, and **add** `--full-train` argument to the above command.
 
 ## Inference
 

@@ -35,13 +35,13 @@ class AtomDenoiseLoss(Metric):
         self.orig_vals = None
 
     def update(self, 
-               node_pos_head: Tensor,
-               pos_noise: Tensor,
-               channels_3d_mask: Tensor, 
-               targets: Tensor, 
-               node_pos: Tensor, **_):
+               node_pos_head: Tensor=None,
+               pos_noise: Tensor=None,
+               channels_3d_mask: Tensor=None, 
+               targets: Tensor=None, 
+               node_pos: Tensor=None, **_):
 
-        if node_pos_head is None:
+        if node_pos_head is None or channels_3d_mask is None:
             return 0.0
         n = node_pos_head.shape[0]
         mask = (node_pos == 0.0).all(dim=-1, keepdim=True)[channels_3d_mask]

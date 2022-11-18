@@ -199,7 +199,7 @@ def train(model: nn.Module,
     batch_times = []
 
     if dist.is_initialized():
-        model = DistributedDataParallel(model, device_ids=[local_rank], output_device=local_rank)
+        model = DistributedDataParallel(model, device_ids=[local_rank], output_device=local_rank, find_unused_parameters=True)
 
     grad_scaler = torch.cuda.amp.GradScaler(enabled=args.amp)
     epoch_start = load_state(model, optimizer, lr_scheduler,

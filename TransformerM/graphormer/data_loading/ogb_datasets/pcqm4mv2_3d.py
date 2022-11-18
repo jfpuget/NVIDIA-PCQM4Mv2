@@ -98,7 +98,7 @@ def mol2graph(mol):
 class Pyg3DPCQM4Mv2Dataset(InMemoryDataset):
     def __init__(self, root='dataset', use_sdf=True, compute_descriptors=False, transform=None, pre_transform=None):
         self.original_root = root
-        self.folder = osp.join(root, 'pcqm4m-v2-3d')
+        self.folder = osp.join(root, 'pcqm4m-v2-3d-descriptor' if compute_descriptors else 'pcqm4m-v2-3d')
         self.version = 1
         self.use_sdf = use_sdf
 
@@ -188,7 +188,7 @@ class Pyg3DPCQM4Mv2Dataset(InMemoryDataset):
                 dtype='float32',
                 mode='w+',
                 shape=(3746620, 201)
-        )
+            )
         print('Converting SMILES strings into graphs...')
         data_list = [self.process_item(*ll) for ll in tqdm(
             itertools.zip_longest(data_df['smiles'], structures, 
