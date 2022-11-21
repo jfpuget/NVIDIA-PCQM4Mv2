@@ -21,8 +21,8 @@ The average MAE is: 0.0983
 
 
 
-REQUIREMENTS:
 
+Running Requirements:
 All the code was run in a nvidia/pytorch:22.04-py3 container. We installed these packages in the container before running the code:
 ```
 torch==1.12.1
