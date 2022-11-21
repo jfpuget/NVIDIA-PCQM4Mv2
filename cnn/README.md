@@ -24,26 +24,16 @@ The average MAE is: 0.0983
 REQUIREMENTS:
 
 All the code was run in a nvidia/pytorch:22.04-py3 container. We installed these packages in the container before running the code:
-
+```
 torch==1.12.1
-
 torch-scatter==2.0.9
-
 torch-sparse==0.6.15
-
 torch-geometric==2.1.0
-
 ogb==1.3.5
-
 rdkit==2022.09.1
-
 opencv-python==4.5.5.64
-
 numpy==1.22.4
-
 pandas==1.4.3
-
 tqdm==4.64.0
-
 matplotlib==3.5.2
-
+```
